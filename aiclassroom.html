@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Fun Classroom Dashboard with AI and Content Management!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the classroom theme */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f9ff; /* Light sky blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .classroom-container {
+            
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            max-width: 95%; /* Slightly wider to accommodate new elements */
+            width: 1200px; /* Increased max-width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chalkboard {
+            background-color: #3b2f2f; /* Dark chalkboard color */
+            color: #ffffff; /* White text for chalk effect */
+            border: 10px solid #8B4513; /* Brown frame */
+            border-radius: 10px;
+            padding: 20px 30px;
+            font-family: 'Permanent Marker', cursive; /* A fun, chalk-like font */
+            font-size: clamp(1.2rem, 3vw, 2.5rem); /* Responsive font size */
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 700px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        /* Google Fonts for 'Permanent Marker' */
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
+        .pencil-icon {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            color: #d2b48c; /* Wood color */
+            -webkit-text-stroke: 1px #8B4513; /* Darker wood outline */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            transform: rotate(-20deg);
+            position: absolute;
+        }
+
+        .book-card {
+            background-color: #e5f0d8; /* Light green for book cover */
+            border: 2px solid #82b95e; /* Darker green border */
+            border-radius: 10px;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            cursor: pointer;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .book-card h3 {
+            color: #336633; /* Dark green for titles */
+            font-weight: bold;
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            margin-bottom: 10px;
+        }
+
+        .book-card p {
+            color: #555;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+        }
+
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .message-box button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .message-box button:hover {
+            background-color: #45a049;
+        }
+
+        /* Dashboard navigation styles */
+        .dashboard-nav {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .dashboard-nav button {
+            background-color: #6a0dad; /* Purple for buttons */
+            color: white;
+            padding: 12px 20px;
+            border: 2px solid #4a0082; /* Darker purple border */
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 2.2vw, 1.2rem);
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            flex-grow: 1; /* Allow buttons to grow */
+            min-width: 120px; /* Minimum width for buttons */
+        }
+
+        .dashboard-nav button:hover {
+            background-color: #4a0082; /* Darker purple on hover */
+            transform: translateY(-2px);
+        }
+
+        .dashboard-content {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            min-height: 250px;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 15px;
+        }
+
+        .dashboard-content.active {
+            display: flex; /* Show when active */
+        }
+
+        .dashboard-content h2 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            color: #6a0dad;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e0b0ff;
+            padding-bottom: 10px;
+        }
+
+        .dashboard-content ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        .dashboard-content li {
+            background-color: #f7f0ff;
+            border: 1px solid #d4c1ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: #333;
+        }
+
+        .dashboard-content li strong {
+            color: #4a0082;
+        }
+
+        .query-box, .text-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            border: 2px solid #a0c4ff;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 40px; /* Adjusted for single line inputs */
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .query-button, .add-button {
+            background-color: #72aaff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .query-button:hover, .add-button:hover {
+            background-color: #5b9bff;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            .classroom-container {
+                padding: 15px;
+            }
+            .dashboard-nav button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+        .ai-answer {
+            background-color: #e0f2fe; /* Light blue for AI answers */
+            border-left: 5px solid #2196f3; /* Blue left border */
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            color: #1a237e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="classroom-container">
+        <!-- Top Left Pencil -->
+        <div class="pencil-icon absolute top-5 left-5">✏️</div>
+        <!-- Top Right Pencil -->
+        <div class="pencil-icon absolute top-5 right-5 rotate-45">✏️</div>
+        <!-- Bottom Left Pencil -->
+        <div class="pencil-icon absolute bottom-5 left-5 -rotate-45">✏️</div>
+        <!-- Bottom Right Pencil -->
+        <div class="pencil-icon absolute bottom-5 right-5 rotate-90">✏️</div>
+
+        <h1 class="text-4xl md:text-5xl lg:text-6xl text-purple-700 font-extrabold mb-8 rounded-lg p-3 bg-yellow-200 shadow-lg border-4 border-yellow-500">
+            Welcome to Our Classroom!
+        </h1>
+
+        <!-- User ID Display <div id="userIdDisplay" class="text-sm text-gray-600 mb-4 p-2 bg-blue-100 rounded-md">
+            Your User ID: <span id="currentUserId" class="font-bold text-blue-800">Loading...</span>
+        </div>-->
+        
+
+        <!-- Dashboard Navigation -->
+        <nav class="dashboard-nav">
+            <button onclick="showDashboard('home-dashboard')">Home</button>
+            <button onclick="showDashboard('assignments-dashboard')">Assignments</button>
+            <button onclick="showDashboard('notes-dashboard')">Notes</button>
+            <button onclick="showDashboard('exams-dashboard')">Exams</button>
+            <button onclick="showDashboard('attendance-dashboard')">Attendance</button>
+            <button onclick="showDashboard('query-dashboard')">Ask a Question</button>
+            <button onclick="showDashboard('meetings-dashboard')">Online Meetings</button>
+        </nav>
+
+        <!-- Home Dashboard Content -->
+        <div id="home-dashboard" class="dashboard-content active">
+            <div class="chalkboard">
+                <p>Did you know a group of owls is called a "parliament"?</p>
+            </div>
+            <div class="book-cards-wrapper flex flex-col md:flex-row gap-6 mt-8 w-full justify-center">
+                <div class="book-card" onclick="showMessage('Animals Adventures', 'Explore the amazing world of animals! Learn about their habitats, what they eat, and how they live.', 'https://placehold.co/400x300/a3e635/000?text=Animal+Adventures')">
+                    <h3>Animal Adventures</h3>
+                    <p>Discover fascinating facts about creatures big and small!</p>
+                </div>
+                <div class="book-card" onclick="showMessage('Space Explorers', 'Blast off into space and learn about planets, stars, and galaxies. The universe is full of wonders!', 'https://placehold.co/400x300/3b82f6/000?text=Space+Explorers')">
+                    <h3>Space Explorers</h3>
+                    <p>Journey through the stars and uncover the mysteries of space!</p>
+                </div>
+                <div class="book-card" onclick="showMessage('History Detectives', 'Travel back in time and uncover secrets from the past. From dinosaurs to ancient civilizations, history is exciting!', 'https://placehold.co/400x300/fbbf24/000?text=History+Detectives')">
+                    <h3>History Detectives</h3>
+                    <p>Unravel the past and meet historical figures!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments Dashboard Content -->
+        <div id="assignments-dashboard" class="dashboard-content">
+            <h2>Your Awesome Assignments!</h2>
+            <p>Time to show off your super skills!</p>
+            <ul id="assignmentsList">
+                <!-- Assignments will be loaded here from Firestore -->
+                <li class="text-gray-500">Loading assignments...</li>
+            </ul>
+        </div>
+
+        <!-- Notes Dashboard Content -->
+        <div id="notes-dashboard" class="dashboard-content">
+            <h2>Your Helpful Notes!</h2>
+            <p>Super important things to remember!</p>
+            <div class="w-full max-w-500px flex flex-col items-center mb-8 p-4 border rounded-lg bg-gray-50">
+                <h3 class="text-xl font-bold text-blue-700 mb-3">Add a New Note</h3>
+                <input type="text" id="noteSubjectInput" class="text-input" placeholder="Subject (e.g., Math, Science)">
+                <textarea id="noteContentInput" class="query-box" placeholder="Write your note here..."></textarea>
+                <button class="add-button" onclick="addNote()">Add Note</button>
+            </div>
+            <ul id="notesList">
+                <li class="text-gray-500">Loading notes...</li>
+            </ul>
+        </div>
+
+        <!-- Exams Dashboard Content -->
+        <div id="exams-dashboard" class="dashboard-content">
+            <h2>Upcoming Exams!</h2>
+            <p>Get ready to shine!</p>
+            <ul id="examsList">
+                 <li class="text-gray-500">Loading exams...</li>
+            </ul>
+        </div>
+
+        <!-- Attendance Dashboard Content -->
+        <div id="attendance-dashboard" class="dashboard-content">
+            <h2>Your Attendance Record</h2>
+            <p>Let's make sure you're here for all the fun!</p>
+            <ul id="attendanceList">
+                 <li class="text-gray-500">Loading attendance...</li>
+            </ul>
+        </div>
+
+        <!-- Query Asking Dashboard Content -->
+        <div id="query-dashboard" class="dashboard-content">
+            <h2>Got a Question? Ask Away!</h2>
+            <p>Your teacher is here to help you learn!</p>
+            <textarea id="queryInput" class="query-box" placeholder="Type your question here..."></textarea>
+            <button class="query-button" onclick="submitQuery()">Send My Question</button>
+            <p id="queryLoading" class="text-blue-500 mt-2 hidden">Thinking...</p>
+            <h3 class="text-xl font-bold mt-6 text-purple-700">Your Past Questions:</h3>
+            <ul id="pastQueriesList" class="w-full max-w-600px text-left">
+                <li class="text-gray-500">Loading your past questions...</li>
+            </ul>
+        </div>
+
+        <!-- Online Meetings Dashboard Content -->
+        <div id="meetings-dashboard" class="dashboard-content">
+            <h2>Join Your Online Class Meetings!</h2>
+            <p>Connect with your classmates and teacher!</p>
+            <div class="w-full max-w-500px flex flex-col items-center mb-8 p-4 border rounded-lg bg-gray-50">
+                <h3 class="text-xl font-bold text-green-700 mb-3">Invite a New Meeting</h3>
+                <input type="text" id="meetingTitleInput" class="text-input" placeholder="Meeting Title (e.g., Science Club)">
+                <input type="text" id="meetingTimeInput" class="text-input" placeholder="Time (e.g., 3:00 PM)">
+                <input type="url" id="meetingLinkInput" class="text-input" placeholder="Meeting Link (e.g., https://meet.google.com/abc-xyz)">
+                <button class="add-button" onclick="addMeeting()">Add Meeting</button>
+            </div>
+            <ul id="meetingsList">
+                <li class="text-gray-500">Loading meetings...</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Message Box for displaying book details and query confirmations -->
+    <div id="messageBox" class="message-box">
+        <h3 id="messageTitle" class="text-2xl font-bold text-gray-800"></h3>
+        <img id="messageImage" src="" alt="Info Icon" class="rounded-lg mb-3" style="max-width: 200px; height: auto;">
+        <p id="messageText" class="text-gray-700"></p>
+        <button onclick="hideMessage()">Got It!</button>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase (provided by the environment)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null;
+
+        // Function to show the custom message box
+        window.showMessage = function(title, text, imageUrl) {
+            const messageBox = document.getElementById('messageBox');
+            const messageTitle = document.getElementById('messageTitle');
+            const messageImage = document.getElementById('messageImage');
+            const messageText = document.getElementById('messageText');
+
+            messageTitle.textContent = title;
+            messageImage.src = imageUrl;
+            messageText.textContent = text;
+            messageBox.style.display = 'flex';
+        }
+
+        // Function to hide the custom message box
+        window.hideMessage = function() {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.style.display = 'none';
+        }
+
+        // Function to show a specific dashboard and hide others
+        window.showDashboard = function(dashboardId) {
+            const dashboards = document.querySelectorAll('.dashboard-content');
+            dashboards.forEach(dashboard => {
+                dashboard.classList.remove('active');
+            });
+            document.getElementById(dashboardId).classList.add('active');
+
+            // Load data when dashboard is shown
+            if (currentUserId) {
+                switch (dashboardId) {
+                    case 'assignments-dashboard': loadAssignments(); break;
+                    case 'notes-dashboard': loadNotes(); break;
+                    case 'exams-dashboard': loadExams(); break;
+                    case 'attendance-dashboard': loadAttendance(); break;
+                    case 'query-dashboard': loadPastQueries(); break;
+                    case 'meetings-dashboard': loadMeetings(); break;
+                    // No specific load needed for home-dashboard on switch
+                }
+            }
+        }
+
+        // --- Firebase Initialization and Authentication ---
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        document.getElementById('currentUserId').textContent = currentUserId;
+                        console.log("User authenticated:", currentUserId);
+
+                        showDashboard('home-dashboard'); // Default to home
+
+                        // Ensure initial data is present (non-blocking)
+                        addInitialDataIfEmpty('assignments', initialAssignments);
+                        addInitialDataIfEmpty('notes', initialNotes);
+                        addInitialDataIfEmpty('exams', initialExams);
+                        addInitialDataIfEmpty('attendance', initialAttendance);
+                        addInitialDataIfEmpty('meetings', initialMeetings);
+
+                        // Load data for currently active dashboard
+                        const activeDashboardId = document.querySelector('.dashboard-content.active')?.id || 'home-dashboard';
+                        showDashboard(activeDashboardId);
+
+                    } else {
+                        if (initialAuthToken) {
+                            try {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                console.log("Signed in with custom token.");
+                            } catch (error) {
+                                console.error("Error signing in with custom token:", error);
+                                await signInAnonymously(auth);
+                                console.log("Signed in anonymously (fallback).");
+                            }
+                        } else {
+                            await signInAnonymously(auth);
+                            console.log("Signed in anonymously.");
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                document.getElementById('currentUserId').textContent = "Error loading ID";
+            }
+        }
+
+        // --- Firestore Data Functions ---
+
+        function getUserCollectionPath(collectionName) {
+            if (!currentUserId) {
+                console.error("User ID not available for collection path.");
+                return null;
+            }
+            return `artifacts/${appId}/users/${currentUserId}/${collectionName}`;
+        }
+
+        function loadAssignments() {
+            const assignmentsList = document.getElementById('assignmentsList');
+            const path = getUserCollectionPath('assignments');
+            if (!path) { assignmentsList.innerHTML = '<li class="text-red-500">Authentication error.</li>'; return; }
+
+            onSnapshot(collection(db, path), (snapshot) => {
+                assignmentsList.innerHTML = '';
+                if (snapshot.empty) {
+                    assignmentsList.innerHTML = '<li class="text-gray-500">No assignments yet!</li>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${data.title}:</strong> ${data.description} <span class="${data.status === 'Due' ? 'text-green-600' : 'text-blue-600'}">Due: ${data.dueDate}</span>`;
+                    assignmentsList.appendChild(li);
+                });
+            }, (error) => {
+                console.error("Error loading assignments:", error);
+                assignmentsList.innerHTML = '<li class="text-red-500">Error loading assignments.</li>';
+            });
+        }
+
+        // Add a new note to Firestore
+        window.addNote = async function() {
+            const subjectInput = document.getElementById('noteSubjectInput');
+            const contentInput = document.getElementById('noteContentInput');
+            const subject = subjectInput.value.trim();
+            const content = contentInput.value.trim();
+
+            if (!subject || !content) {
+                showMessage('Oops!', 'Please enter both a subject and some content for your note.', 'https://placehold.co/400x300/ffcc00/000?text=Warning');
+                return;
+            }
+            if (!currentUserId) {
+                showMessage('Error!', 'Please wait while we set up your user ID.', 'https://placehold.co/400x300/ff0000/fff?text=Error');
+                return;
+            }
+
+            const path = getUserCollectionPath('notes');
+            if (!path) return;
+
+            try {
+                await addDoc(collection(db, path), {
+                    subject: subject,
+                    content: content,
+                    timestamp: serverTimestamp()
+                });
+                showMessage('Note Added!', 'Your new note has been saved!', 'https://placehold.co/400x300/4CAF50/fff?text=Note+Saved');
+                subjectInput.value = '';
+                contentInput.value = '';
+            } catch (error) {
+                console.error("Error adding note:", error);
+                showMessage('Error!', 'Could not add your note. Please try again!', 'https://placehold.co/400x300/ff0000/fff?text=Error');
+            }
+        }
+
+        function loadNotes() {
+            const notesList = document.getElementById('notesList');
+            const path = getUserCollectionPath('notes');
+            if (!path) { notesList.innerHTML = '<li class="text-red-500">Authentication error.</li>'; return; }
+
+            onSnapshot(collection(db, path), (snapshot) => {
+                notesList.innerHTML = '';
+                if (snapshot.empty) {
+                    notesList.innerHTML = '<li class="text-gray-500">No notes yet!</li>';
+                    return;
+                }
+                const notes = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    notes.push({ ...data, id: doc.id });
+                });
+                // Sort client-side by timestamp in descending order
+                notes.sort((a, b) => (b.timestamp ? b.timestamp.toDate() : new Date()).getTime() - (a.timestamp ? a.timestamp.toDate() : new Date()).getTime());
+
+                notes.forEach(note => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${note.subject}:</strong> ${note.content}`;
+                    notesList.appendChild(li);
+                });
+            }, (error) => {
+                console.error("Error loading notes:", error);
+                notesList.innerHTML = '<li class="text-red-500">Error loading notes.</li>';
+            });
+        }
+
+        function loadExams() {
+            const examsList = document.getElementById('examsList');
+            const path = getUserCollectionPath('exams');
+            if (!path) { examsList.innerHTML = '<li class="text-red-500">Authentication error.</li>'; return; }
+
+            onSnapshot(collection(db, path), (snapshot) => {
+                examsList.innerHTML = '';
+                if (snapshot.empty) {
+                    examsList.innerHTML = '<li class="text-gray-500">No exams scheduled yet!</li>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${data.subject} Test:</strong> ${data.topic} - <span class="text-red-600">${data.date}</span>`;
+                    examsList.appendChild(li);
+                });
+            }, (error) => {
+                console.error("Error loading exams:", error);
+                examsList.innerHTML = '<li class="text-red-500">Error loading exams.</li>';
+            });
+        }
+
+        function loadAttendance() {
+            const attendanceList = document.getElementById('attendanceList');
+            const path = getUserCollectionPath('attendance');
+            if (!path) { attendanceList.innerHTML = '<li class="text-red-500">Authentication error.</li>'; return; }
+
+            onSnapshot(collection(db, path), (snapshot) => {
+                attendanceList.innerHTML = '';
+                if (snapshot.empty) {
+                    attendanceList.innerHTML = '<li class="text-gray-500">Attendance record not available.</li>';
+                    return;
+                }
+                const attendanceRecords = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    attendanceRecords.push({ ...data, id: doc.id });
+                });
+                // Sort by date if 'date' is a proper date string or timestamp, or assume chronological for simplicity
+                attendanceRecords.sort((a, b) => a.date.localeCompare(b.date)); // Simple string comparison for dates
+
+                attendanceRecords.forEach(record => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${record.date}:</strong> ${record.status === 'Present' ? 'Present 🎉' : 'Absent 😞'}`;
+                    attendanceList.appendChild(li);
+                });
+            }, (error) => {
+                console.error("Error loading attendance:", error);
+                attendanceList.innerHTML = '<li class="text-red-500">Error loading attendance.</li>';
+            });
+        }
+
+        // Submit a Query to Firestore and get AI answer
+        window.submitQuery = async function() {
+            const queryInput = document.getElementById('queryInput');
+            const queryLoading = document.getElementById('queryLoading');
+            const queryText = queryInput.value.trim();
+
+            if (queryText === "") {
+                showMessage('Oops!', 'Please type your question before sending it!', 'https://placehold.co/400x300/ffcc00/000?text=Warning');
+                return;
+            }
+            if (!currentUserId) {
+                showMessage('Error!', 'Please wait while we set up your user ID.', 'https://placehold.co/400x300/ff0000/fff?text=Error');
+                return;
+            }
+
+            queryLoading.classList.remove('hidden'); // Show thinking message
+            queryInput.disabled = true; // Disable input while AI is thinking
+
+            const path = getUserCollectionPath('queries');
+            if (!path) {
+                queryLoading.classList.add('hidden');
+                queryInput.disabled = false;
+                showMessage('Error!', 'Could not determine user path for queries.', 'https://placehold.co/400x300/ff0000/fff?text=Error');
+                return;
+            }
+
+            let newQueryRef = null; // Initialize newQueryRef
+
+            try {
+                // 1. Add the user's query to Firestore first (with a placeholder answer)
+                newQueryRef = await addDoc(collection(db, path), {
+                    query: queryText,
+                    timestamp: serverTimestamp(),
+                    answer: "Thinking..." // Placeholder while AI processes
+                });
+                console.log("Query added to Firestore with placeholder:", queryText);
+
+                // 2. Call the Gemini API for AI answer
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: queryText }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Canvas will provide this in runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                console.log("Sending request to Gemini API with payload:", JSON.stringify(payload));
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Gemini API HTTP error! Status: ${response.status}, Details: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log("Received response from Gemini API:", result);
+
+                let aiAnswer = "Sorry, I couldn't find an answer right now. Please try asking again!";
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    aiAnswer = result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Gemini API response structure unexpected, no valid answer found in candidates:", result);
+                }
+
+                // 3. Update the Firestore document with the AI's final answer
+                if (newQueryRef) {
+                    await updateDoc(doc(db, path, newQueryRef.id), { // Use doc() to specify the exact document
+                        answer: aiAnswer
+                    });
+                    console.log("Firestore document updated with AI answer.");
+                }
+
+                queryInput.value = ''; // Clear the input field
+                showMessage('Question Answered!', 'The AI has responded to your question!', 'https://placehold.co/400x300/2196f3/fff?text=AI+Answer');
+
+            } catch (error) {
+                console.error("Error during query submission or AI response processing:", error);
+                showMessage('Error!', `Could not get an answer. Please try again! Error: ${error.message}`, 'https://placehold.co/400x300/ff0000/fff?text=Error');
+                // If the initial addDoc succeeded but subsequent steps failed, update the placeholder
+                if (newQueryRef) {
+                    await updateDoc(doc(db, path, newQueryRef.id), {
+                        answer: "Error getting answer: " + (error.message || "Unknown error")
+                    });
+                }
+            } finally {
+                queryLoading.classList.add('hidden'); // Hide thinking message
+                queryInput.disabled = false; // Enable input
+            }
+        }
+
+        // Load Past Queries (now including AI answers)
+        function loadPastQueries() {
+            const pastQueriesList = document.getElementById('pastQueriesList');
+            const path = getUserCollectionPath('queries');
+            if (!path) { pastQueriesList.innerHTML = '<li class="text-red-500">Authentication error.</li>'; return; }
+
+            onSnapshot(collection(db, path), (snapshot) => {
+                pastQueriesList.innerHTML = '';
+                if (snapshot.empty) {
+                    pastQueriesList.innerHTML = '<li class="text-gray-500">You haven\'t asked any questions yet.</li>';
+                    return;
+                }
+                const queries = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    queries.push({
+                        id: doc.id,
+                        query: data.query,
+                        timestamp: data.timestamp ? data.timestamp.toDate() : new Date(),
+                        answer: data.answer || "No answer yet." // Get answer or default
+                    });
+                });
+
+                // Sort client-side by timestamp in descending order
+                queries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+                queries.forEach(q => {
+                    const li = document.createElement('li');
+                    const timeString = q.timestamp.toLocaleDateString() + ' ' + q.timestamp.toLocaleTimeString();
+                    li.innerHTML = `
+                        <strong>Your Question:</strong> ${q.query} <br>
+                        <span class="text-gray-500 text-sm">Asked: ${timeString}</span>
+                        <div class="ai-answer"><strong>AI's Answer:</strong> ${q.answer}</div>
+                    `;
+                    pastQueriesList.appendChild(li);
+                });
+            }, (error) => {
+                console.error("Error loading past queries:", error);
+                pastQueriesList.innerHTML = '<li class="text-red-500">Error loading past questions.</li>';
+            });
+        }
+
+        // Add a new meeting to Firestore
+        window.addMeeting = async function() {
+            const titleInput = document.getElementById('meetingTitleInput');
+            const timeInput = document.getElementById('meetingTimeInput');
+            const linkInput = document.getElementById('meetingLinkInput');
+
+            const title = titleInput.value.trim();
+            const time = timeInput.value.trim();
+            let link = linkInput.value.trim();
+
+            if (!title || !time || !link) {
+                showMessage('Oops!', 'Please fill in all meeting details (Title, Time, Link).', 'https://placehold.co/400x300/ffcc00/000?text=Warning');
+                return;
+            }
+            if (!currentUserId) {
+                showMessage('Error!', 'Please wait while we set up your user ID.', 'https://placehold.co/400x300/ff0000/fff?text=Error');
+                return;
+            }
+
+            // Simple URL validation (can be more robust if needed)
+            if (!link.startsWith('http://') && !link.startsWith('https://')) {
+                link = 'https://' + link; // Prepend https if missing
+            }
+
+            const path = getUserCollectionPath('meetings');
+            if (!path) return;
+
+            try {
+                await addDoc(collection(db, path), {
+                    title: title,
+                    time: time,
+                    link: link,
+                    timestamp: serverTimestamp()
+                });
+                showMessage('Meeting Added!', 'Your new meeting has been scheduled!', 'https://placehold.co/400x300/4CAF50/fff?text=Meeting+Added');
+                titleInput.value = '';
+                timeInput.value = '';
+                linkInput.value = '';
+            } catch (error) {
+                console.error("Error adding meeting:", error);
+                showMessage('Error!', 'Could not add meeting. Please try again!', 'https://placehold.co/400x300/ff0000/fff?text=Error');
+            }
+        }
+
+        function loadMeetings() {
+            const meetingsList = document.getElementById('meetingsList');
+            const path = getUserCollectionPath('meetings');
+            if (!path) { meetingsList.innerHTML = '<li class="text-red-500">Authentication error.</li>'; return; }
+
+            onSnapshot(collection(db, path), (snapshot) => {
+                meetingsList.innerHTML = '';
+                if (snapshot.empty) {
+                    meetingsList.innerHTML = '<li class="text-gray-500">No upcoming meetings!</li>';
+                    return;
+                }
+                const meetings = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    meetings.push({ ...data, id: doc.id });
+                });
+                // Sort client-side by timestamp in descending order
+                meetings.sort((a, b) => (b.timestamp ? b.timestamp.toDate() : new Date()).getTime() - (a.timestamp ? a.timestamp.toDate() : new Date()).getTime());
+
+                meetings.forEach(meeting => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${meeting.title}:</strong> ${meeting.time} - <a href="${meeting.link}" target="_blank" class="text-blue-500 hover:underline">Join Now</a>`;
+                    meetingsList.appendChild(li);
+                });
+            }, (error) => {
+                console.error("Error loading meetings:", error);
+                meetingsList.innerHTML = '<li class="text-red-500">Error loading meetings.</li>';
+            });
+        }
+
+
+        // --- Initial Data Population (Optional - for first run, you can remove these later) ---
+        async function addInitialDataIfEmpty(collectionName, dataArray) {
+            const path = getUserCollectionPath(collectionName);
+            if (!path) return;
+
+            try {
+                const colRef = collection(db, path);
+                // Corrected: Use query(colRef) and getDocs() to fetch documents from a collection.
+                const q = query(colRef);
+                const snapshot = await getDocs(q); // Use getDocs with the query
+
+                if (snapshot.empty) {
+                    console.log(`Adding initial data to ${collectionName}...`);
+                    for (const item of dataArray) {
+                        await addDoc(colRef, item);
+                    }
+                }
+            } catch (error) {
+                console.error(`Error checking/adding initial data for ${collectionName}:`, error);
+            }
+        }
+
+        // Sample data to populate initially if the collections are empty
+        const initialAssignments = [
+            { title: 'Math Magic', description: 'Solve the Great Fraction Puzzle!', dueDate: 'Friday', status: 'Due' },
+            { title: 'Science Quest', description: 'Draw the Life Cycle of a Butterfly.', dueDate: 'Next Monday', status: 'Due' },
+            { title: 'Story Time', description: 'Write a short story about a talking animal.', dueDate: 'Wednesday', status: 'Due' }
+        ];
+
+        const initialNotes = [
+            { subject: 'Math', content: 'Remember to multiply before you add!' },
+            { subject: 'Science', content: 'Plants need sunlight, water, and soil to grow.' },
+            { subject: 'English', content: 'A noun is a person, place, or thing.' }
+        ];
+
+        const initialExams = [
+            { subject: 'Math', topic: 'Addition and Subtraction', date: 'Next Tuesday' },
+            { subject: 'Science', topic: 'Animals and Their Habitats', date: 'Next Friday' }
+        ];
+
+        const initialAttendance = [
+            { date: 'Monday', status: 'Present' },
+            { date: 'Tuesday', status: 'Present' },
+            { date: 'Wednesday', status: 'Present' },
+            { date: 'Thursday', status: 'Present' },
+            { date: 'Friday', status: 'Present' }
+        ];
+
+        const initialMeetings = [
+            { title: 'Morning Check-in', time: '9:00 AM', link: 'https://placehold.co/400x300/6a0dad/fff?text=Meeting+Link+1' },
+            { title: 'Story Time Live', time: '2:00 PM', link: 'https://placehold.co/400x300/6a0dad/fff?text=Meeting+Link+2' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', initializeFirebase);
+    </script>
+</body>
+</html>
